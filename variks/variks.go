@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -20,7 +22,7 @@ func randQuote() string {
 		"They will want to kill you. Kill them back.",
 		"They will try to kill you. Kill them back.",
 		"Kill them dead, Guardian.",
-		"Return/Retreat to airlock, Guardian...",
+		"Retreat to airlock, Guardian...",
 		"Go back to airlock, yes?",
 		"Incoming...",
 		"Reinforcements. Ready for combat.",
@@ -73,6 +75,10 @@ func randQuote() string {
 func main() {
 	// grab a random variks quote
 	vquote := randQuote()
+	if strings.Contains(vquote, "Sylok") {
+		fmt.Println(strings.ToUpper(vquote))
+		os.Exit(0)
+	}
 	// send it to stdout
 	fmt.Println(vquote)
 }
