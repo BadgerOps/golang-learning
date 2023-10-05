@@ -1,0 +1,10 @@
+email: github@badgerops.net
+name: BadgerOps
+nested_dict:
+    even_more:
+        foo: bar
+    now_a_list:
+        - fizz
+        - buzz
+        - fizzbuzz
+profession: H@x0r

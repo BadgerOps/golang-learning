@@ -1,0 +1,10 @@
+{
+  "name": "BadgerOps",
+  "email": "github@badgerops.net",
+  "profession": "H@x0r",
+  "nested_dict": {
+    "even_more": {"foo": "bar"},
+    "now_a_list":
+            ["fizz", "buzz", "fizzbuzz"]
+  }
+}
