@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/jaytaylor/html2text"
 )
 
 type GhostExport struct {
@@ -21,23 +23,23 @@ type GhostExport struct {
 }
 
 func displayHelp() {
-	fmt.Println(`Ghost Export to Static HTML Converter
+	fmt.Println(`Ghost Export to Static Markdown Converter
 
 Usage:
   -f string
         Path to the Ghost JSON export.
   -o string
-        Output directory for the static HTML files.
+        Output directory for the static Markdown files.
 
 Example:
   go run main.go -f export.json -o outputDir
 
-This tool takes a Ghost CMS JSON export and converts each post into a static HTML file. The resulting HTML files will be saved in the provided output directory.`)
+This tool takes a Ghost CMS JSON export and converts each post into a static Markdown file. The resulting Markdown files will be saved in the provided output directory.`)
 }
 
 func main() {
 	filePath := flag.String("f", "", "path to Ghost JSON export")
-	outDir := flag.String("o", "", "output directory for the static HTML")
+	outDir := flag.String("o", "", "output directory for the static Markdown")
 	help := flag.Bool("h", false, "display help")
 	flag.BoolVar(help, "help", false, "display help")
 
@@ -75,9 +77,15 @@ func main() {
 	}
 
 	for _, post := range export.Db[0].Data.Posts {
-		filename := filepath.Join(*outDir, post.Slug+".html")
-		content := fmt.Sprintf("<html><head><title>%s</title></head><body>%s</body></html>", post.Title, post.Content)
-		err := os.WriteFile(filename, []byte(content), 0644)
+		markdown, err := html2text.FromString(post.Content, html2text.Options{PrettyTables: true})
+		if err != nil {
+			fmt.Printf("Error converting HTML to Markdown for post %s: %v\n", post.Title, err)
+			continue
+		}
+
+		content := fmt.Sprintf("# %s\n\n%s", post.Title, markdown)
+		filename := filepath.Join(*outDir, post.Slug+".md")
+		err = os.WriteFile(filename, []byte(content), 0644)
 		if err != nil {
 			fmt.Printf("Error writing file %s: %v\n", filename, err)
 		} else {
