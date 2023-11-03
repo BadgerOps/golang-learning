@@ -14,7 +14,7 @@ type GhostExport struct {
 		Data struct {
 			Posts []struct {
 				Title     string    `json:"title"`
-				Content   string    `json:"html"`
+				Content   string    `json:"mobiledoc"`
 				Slug      string    `json:"slug"`
 				CreatedAt time.Time `json:"created_at"`
 			} `json:"posts"`
@@ -77,7 +77,57 @@ func main() {
 	}
 
 	for _, post := range export.Db[0].Data.Posts {
-		// Hugo front matter (TOML format in this case, but can be changed to YAML if preferred)
+		var mobiledoc struct {
+			Cards [][]interface{} `json:"cards"`
+		}
+		if err := json.Unmarshal([]byte(post.Content), &mobiledoc); err != nil {
+			fmt.Printf("Error extracting content for post %s: %v\n", post.Title, err)
+			continue
+		}
+
+		var markdownContent string
+		for _, card := range mobiledoc.Cards {
+			cardType, ok := card[0].(string)
+			if !ok {
+				fmt.Printf("Unexpected card type format for post %s\n", post.Title)
+				continue
+			}
+
+			switch cardType {
+			case "markdown":
+				content, _ := card[1].(map[string]interface{})["markdown"].(string)
+				markdownContent += content
+			case "hr":
+				markdownContent += "\n---\n"
+			case "code":
+				codeContent, ok := card[1].(map[string]interface{})["code"].(string)
+				language, langOk := card[1].(map[string]interface{})["language"].(string)
+				if ok {
+					if !langOk {
+						language = ""
+					}
+					markdownContent += fmt.Sprintf("\n```%s\n%s\n```\n", language, codeContent)
+				}
+			case "image":
+				imageURL, ok := card[1].(map[string]interface{})["src"].(string)
+				altText, altOk := card[1].(map[string]interface{})["alt"].(string)
+				if ok {
+					if !altOk {
+						altText = ""
+					}
+					markdownContent += fmt.Sprintf("\n![%s](%s)\n", altText, imageURL)
+				}
+			default:
+				fmt.Printf("Unhandled card type '%s' for post %s\n", cardType, post.Title)
+			}
+		}
+
+		if markdownContent == "" {
+			fmt.Printf("No content extracted for post %s\n", post.Title)
+			continue
+		}
+
+		// Hugo front matter (TOML format)
 		frontMatter := fmt.Sprintf(`+++
 title = "%s"
 date = "%s"
@@ -86,7 +136,7 @@ draft = false
 
 `, post.Title, post.CreatedAt.Format(time.RFC3339))
 
-		content := frontMatter + post.Content
+		content := frontMatter + markdownContent
 		filename := filepath.Join(*outDir, post.Slug+".md")
 		err = os.WriteFile(filename, []byte(content), 0644)
 		if err != nil {
