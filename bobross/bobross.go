@@ -8,7 +8,7 @@ import (
 )
 
 func getBob() string {
-	bobURL := "https://www.bobrossquotes.com/text.php"
+	bobURL := string "https://www.bobrossquotes.com/text.php"
 	reqURL := fmt.Sprintf("%v", bobURL)
 	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
 	if err != nil {
