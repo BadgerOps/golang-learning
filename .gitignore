@@ -26,3 +26,7 @@ go.work
 =======
 # Any go built files
 *go.sum*
+
+# any of my output folders
+*output*
+
