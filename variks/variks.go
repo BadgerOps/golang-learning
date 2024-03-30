@@ -75,6 +75,7 @@ func randQuote() string {
 func main() {
 	// grab a random variks quote
 	vquote := randQuote()
+	// SYLOK THE DEFILED!
 	if strings.Contains(vquote, "Sylok") {
 		fmt.Println(strings.ToUpper(vquote))
 		os.Exit(0)
