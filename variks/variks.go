@@ -10,7 +10,7 @@ import (
 
 func randQuote() string {
 	// set up random seed generation
-	rand.Seed(time.Now().Unix())
+	rand.New(rand.NewSource(time.Now().UnixNano()))
 	// set up array of quotes from Variks
 	quotes := []string{
 		"Fight. Win. Live.",
@@ -68,7 +68,7 @@ func randQuote() string {
 		"Taste victory. It is sweet. You have won.",
 	}
 	// grab a random quote using our rand seed we created
-	q := rand.Int() % len(quotes)
+	q := rand.Intn(len(quotes))
 	return fmt.Sprintf("\n%v\n", quotes[q])
 }
 
